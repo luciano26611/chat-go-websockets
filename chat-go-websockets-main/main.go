@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,9 +11,14 @@ import (
 
 func main() {
 	err := godotenv.Load(".env")
-
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Warning: .env file not found, using environment variables")
+	}
+
+	// Obtener puerto de variable de entorno o usar 8080 por defecto
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
 
 	log.Println("Websocket server started")
@@ -64,5 +68,6 @@ func main() {
 		}
 	})
 	
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
+	log.Printf("Server starting on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

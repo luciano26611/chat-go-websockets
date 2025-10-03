@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: chat-go-websockets
+    env: go
+    buildCommand: cd chat-go-websockets-main && go build -o main .
+    startCommand: cd chat-go-websockets-main && ./main
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: GO_VERSION
+        value: 1.23
