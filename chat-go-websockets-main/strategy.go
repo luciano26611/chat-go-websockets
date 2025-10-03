@@ -66,6 +66,10 @@ func NewBadWordReplacementStrategy() *BadWordReplacementStrategy {
 		"malo", "feo", "tonto", "idiota", "estúpido", "imbécil",
 		"odio", "asco", "basura", "mierda", "joder", "puta",
 		"cabrón", "hijo de puta", "maldito", "desgraciado",
+		"mallo", "mal", "tonta", "estupido", "imbecil",
+		"puto", "cabron", "mierda", "jodido", "jodida",
+		"hdp", "hijo de puta", "conchudo", "pelotudo",
+		"boludo", "gil", "gila", "boluda", "pelotuda",
 		// Agregar más palabras según sea necesario
 	}
 	
@@ -84,24 +88,22 @@ func (bwrs *BadWordReplacementStrategy) Moderate(message string) ModerationResul
 	wordsFound := []string{}
 
 	// Convertir a minúsculas para comparación
-	lowerMessage := strings.ToLower(message)
+	// lowerMessage := strings.ToLower(message)
 	
 	for _, badWord := range bwrs.badWords {
-		// Usar regex para encontrar palabras completas
-		pattern := `\b` + regexp.QuoteMeta(strings.ToLower(badWord)) + `\b`
+		// Usar regex para encontrar palabras completas (case insensitive)
+		pattern := `(?i)\b` + regexp.QuoteMeta(badWord) + `\b`
 		regex, err := regexp.Compile(pattern)
 		if err != nil {
 			continue
 		}
 		
-		if regex.MatchString(lowerMessage) {
+		if regex.MatchString(message) {
 			wordsFound = append(wordsFound, badWord)
-			// Reemplazar la palabra original (manteniendo mayúsculas/minúsculas)
-			modifiedMessage = regex.ReplaceAllStringFunc(message, func(match string) string {
-				return bwrs.replacement
-			})
+			// Reemplazar todas las ocurrencias de la palabra
+			modifiedMessage = regex.ReplaceAllString(message, bwrs.replacement)
 			action = "modify"
-			reason = "Inappropriate words detected and replaced"
+			reason = "Inappropriate words detected and replaced: " + strings.Join(wordsFound, ", ")
 			confidence = 0.8
 		}
 	}
