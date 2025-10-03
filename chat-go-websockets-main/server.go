@@ -110,9 +110,8 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			observer.SetUsername(chatMsg.Username)
 		}
 		
-		// Crear contexto de moderación temporal para este mensaje
-		moderationContext := NewModerationContext(NewBadWordReplacementStrategy())
-		moderationResult := moderationContext.ModerateMessage(chatMsg.Message)
+		// Usar la estrategia de moderación centralizada del servidor
+		moderationResult := s.moderateMessage(chatMsg.Message)
 		
 		// Usar el mensaje moderado si fue modificado
 		finalMessage := chatMsg.Message
@@ -148,6 +147,28 @@ func (s *Server) GetConnectionCount() int {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	return len(s.observerMap)
+}
+
+// Método para moderar mensajes usando la estrategia centralizada
+func (s *Server) moderateMessage(message string) ModerationResult {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	
+	if s.moderationObserver == nil {
+		// Si no hay moderación, permitir el mensaje
+		return ModerationResult{
+			OriginalMessage: message,
+			ModifiedMessage: message,
+			Action:          "allow",
+			Reason:          "No moderation configured",
+			Confidence:      0.0,
+			Timestamp:       time.Now(),
+			StrategyUsed:    "none",
+		}
+	}
+	
+	// Usar la estrategia del ModerationObserver
+	return s.moderationObserver.Moderator.ModerateMessage(message)
 }
 
 // Método para cambiar la estrategia de moderación

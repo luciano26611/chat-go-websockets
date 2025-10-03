@@ -276,7 +276,7 @@ func (cms *CompositeModerationStrategy) GetName() string {
 // ModerationObserver implementa Observer para moderar mensajes
 type ModerationObserver struct {
 	id           string
-	moderator    *ModerationContext
+	Moderator    *ModerationContext
 	blockedCount int64
 	modifiedCount int64
 	warningCount int64
@@ -285,7 +285,7 @@ type ModerationObserver struct {
 func NewModerationObserver(strategy ModerationStrategy) *ModerationObserver {
 	return &ModerationObserver{
 		id:        "moderation_observer",
-		moderator: NewModerationContext(strategy),
+		Moderator: NewModerationContext(strategy),
 	}
 }
 
@@ -298,7 +298,7 @@ func (mo *ModerationObserver) Update(event Event) {
 		}
 		
 		// Moderar el mensaje
-		result := mo.moderator.ModerateMessage(message)
+		result := mo.Moderator.ModerateMessage(message)
 		
 		// Actualizar contadores
 		switch result.Action {
@@ -328,7 +328,7 @@ func (mo *ModerationObserver) GetID() string {
 }
 
 func (mo *ModerationObserver) SetStrategy(strategy ModerationStrategy) {
-	mo.moderator.SetStrategy(strategy)
+	mo.Moderator.SetStrategy(strategy)
 }
 
 func (mo *ModerationObserver) GetStats() map[string]interface{} {
@@ -336,6 +336,6 @@ func (mo *ModerationObserver) GetStats() map[string]interface{} {
 		"blocked_messages":  mo.blockedCount,
 		"modified_messages": mo.modifiedCount,
 		"warning_messages":  mo.warningCount,
-		"strategy":          mo.moderator.strategy.GetName(),
+		"strategy":          mo.Moderator.strategy.GetName(),
 	}
 }
